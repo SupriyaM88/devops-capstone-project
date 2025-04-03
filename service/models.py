@@ -143,3 +143,95 @@ class Account(db.Model, PersistentBase):
         """
         logger.info("Processing name query for %s ...", name)
         return cls.query.filter(cls.name == name)
+          @classmethod
+    def init_db(cls, app: Flask):
+        """Initializes the database session
+
+        :param app: the Flask app
+        :type data: Flask
+
+        """
+        logger.info("Initializing database")
+        # This is where we initialize SQLAlchemy from the Flask app
+        db.init_app(app)
+        app.app_context().push()
+        db.create_all()  # make our sqlalchemy tables
+
+    @classmethod
+    def all(cls) -> list:
+        """Returns all of the Products in the database"""
+        logger.info("Processing all Products")
+        return cls.query.all()
+
+    @classmethod
+    def find(cls, product_id: int):
+        """Finds a Product by it's ID
+
+        :param product_id: the id of the Product to find
+        :type product_id: int
+
+        :return: an instance with the product_id, or None if not found
+        :rtype: Product
+
+        """
+        logger.info("Processing lookup for id %s ...", product_id)
+        return cls.query.get(product_id)
+
+    @classmethod
+    def find_by_name(cls, name: str) -> list:
+        """Returns all Products with the given name
+
+        :param name: the name of the Products you want to match
+        :type name: str
+
+        :return: a collection of Products with that name
+        :rtype: list
+
+        """
+        logger.info("Processing name query for %s ...", name)
+        return cls.query.filter(cls.name == name)
+
+    @classmethod
+    def find_by_price(cls, price: Decimal) -> list:
+        """Returns all Products with the given price
+
+        :param price: the price to search for
+        :type name: float
+
+        :return: a collection of Products with that price
+        :rtype: list
+
+        """
+        logger.info("Processing price query for %s ...", price)
+        price_value = price
+        if isinstance(price, str):
+            price_value = Decimal(price.strip(' "'))
+        return cls.query.filter(cls.price == price_value)
+
+    @classmethod
+    def find_by_availability(cls, available: bool = True) -> list:
+        """Returns all Products by their availability
+
+        :param available: True for products that are available
+        :type available: str
+
+        :return: a collection of Products that are available
+        :rtype: list
+
+        """
+        logger.info("Processing available query for %s ...", available)
+        return cls.query.filter(cls.available == available)
+
+    @classmethod
+    def find_by_category(cls, category: Category = Category.UNKNOWN) -> list:
+        """Returns all Products by their Category
+
+        :param category: values are ['MALE', 'FEMALE', 'UNKNOWN']
+        :type available: enum
+
+        :return: a collection of Products that are available
+        :rtype: list
+
+        """
+        logger.info("Processing category query for %s ...", category.name)
+        return cls.query.filter(cls.category == category)
